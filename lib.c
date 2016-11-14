@@ -19,11 +19,6 @@ struct input readLine(FILE* pFile, int i, cacheDescription descriptor) {
 	input.setIndex = address % (long long int) (descriptor.numberOfLines / descriptor.associativity );
 	input.operation = op;
 
-	if (feof(pFile)) {
-		printf("%d linhas lidas.\n", i + 1);
-		printf("End of File.\n");
-	}
-
 	return input;
 }
 
@@ -37,7 +32,13 @@ int readInput(char* path, cacheDescription descriptor) {
 	if (pFile != NULL) {
 		while(!feof(pFile)) {
 			input = readLine(pFile, i, descriptor);
+      //doStuff(input);
 			i++;
+
+			if (feof(pFile)) {
+				printf("%d linhas lidas.\n", i + 1);
+				printf("End of File.\n");
+			}
 		}
 	} else {
 		printf("Nao foi possivel abrir o arquivo '%s'.", path);
