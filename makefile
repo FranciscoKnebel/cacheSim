@@ -9,15 +9,24 @@ else
   RRM = rm -f -r
 endif
 
-all: $(EXEC) run
+# If the first argument is "run"...
+ifeq (run,$(firstword $(MAKECMDGOALS)))
+  # use the rest as arguments for "run"
+  RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  # ...and turn them into do-nothing targets
+  $(eval $(RUN_ARGS):;@:)
+endif
+
+all: $(EXEC)
 
 main:
 	@echo Compilando o projeto.
-	$(CC) $(CFLAGS) main.c lib.c -o program
+	$(CC) $(CFLAGS) main.c lib.c -o program -lm
 
 run:
 	@echo Executando '.\program':
-	@.\program
+	@echo ./program $(RUN_ARGS)
+	@./program $(RUN_ARGS)
 	@echo Execucao encerrada.
 
 clear:
