@@ -1,20 +1,10 @@
 #include <stdio.h>
 #include <lib.h>
-#include <assert.h>
+#include <stdbool.h>
 
 /*
 	512 blocks / 8 associativity -> 64 sets
 */
-
-int isStringNull(char * string) {
-	if ((string != NULL) && (string[0] == '\0')) {
-		printf("Null");
-	 return 1;
-	}
-
-	printf("%s\n", string);
-	return 0;
-}
 
 int main(int argc, char *argv[]) {
 	if(argc < 4) {
@@ -27,15 +17,18 @@ int main(int argc, char *argv[]) {
 	char * cacheDescriptionPath = argv[1];
 	char * inputFilePath = argv[2];
 	char * outputFilePath = argv[3];
+	struct output output;
 
-	printf("\n-----Francisco Paiva Knebel-----\n");
-	printf("-----       00243688       -----\n");
-	printf("\tArquivo de descricao: %s\n", cacheDescriptionPath);
-	printf("\tArquivo de input: %s\n", inputFilePath);
-	printf("\tArquivo de output: %s\n", outputFilePath);
-	printf("-----                      -----\n");
+	printf("\n----------------------------------------------------------\n");
+	printf("--\t\tFrancisco Paiva Knebel\t\t\t--\n");
+	printf("--\t\t       00243688       \t\t\t--\n");
+	printf("--\t                      \t\t\t\t--\n");
+	printf("--\tArquivo de descricao: \t%s\t\t--\n", cacheDescriptionPath);
+	printf("--\tArquivo de input: \t%s\t\t--\n", inputFilePath);
+	printf("--\tArquivo de output: \t%s\t\t--\n", outputFilePath);
+	printf("----------------------------------------------------------\n");
 
-	cacheDescription descriptor = readCacheDesc(cacheDescriptionPath);
+	cacheDescription descriptor = readCacheDescription(cacheDescriptionPath);
 	printf("\n");
 
 	block blocks[descriptor.numberOfLines][descriptor.lineSize];
@@ -49,6 +42,7 @@ int main(int argc, char *argv[]) {
 
 	/* Test blocks with dereferencing sets */
 	/*
+		blocks[0][0].valid = true;
 		blocks[0][0].tag = 123;
 		blocks[0][0].lastAccess = 123;
 		blocks[0][0].bringAddress = 123;
@@ -61,23 +55,45 @@ int main(int argc, char *argv[]) {
 		blocks[0][descriptor.lineSize - 1].lastAccess = 789;
 		blocks[0][descriptor.lineSize - 1].bringAddress = 789;
 
+		blocks[1][0].tag = 900;
+		blocks[1][0].lastAccess = 900;
+		blocks[1][0].bringAddress = 900;
+
+		blocks[descriptor.associativity - 1][descriptor.lineSize - 1].tag = 500;
+		blocks[descriptor.associativity - 1][descriptor.lineSize - 1].lastAccess = 500;
+		blocks[descriptor.associativity - 1][descriptor.lineSize - 1].bringAddress = 500;
+
 		blocks[descriptor.associativity][0].tag = 11;
 		blocks[descriptor.associativity][0].lastAccess = 100;
 		blocks[descriptor.associativity][0].bringAddress = 100;
 
-		printf("\n%ld %d %d\n", sets[0]->tag, sets[0]->lastAccess, sets[0]->bringAddress); // Assert 123 123 123
-		printf("%ld %d %d\n", (sets[0] + 1 )->tag, (sets[0] + 1 )->lastAccess, (sets[0] + 1 )->bringAddress); // Assert 456 456 456
-		printf("%ld %d %d\n",
+		printf("\n%d - %ld %d %d\n", sets[0]->valid, sets[0]->tag, sets[0]->lastAccess, sets[0]->bringAddress); // Assert 123 123 123
+		printf("%d - %ld %d %d\n", (sets[0] + 1 )->valid, (sets[0] + 1 )->tag, (sets[0] + 1 )->lastAccess, (sets[0] + 1 )->bringAddress); // Assert 456 456 456
+		printf("%d - %ld %d %d\n",
+			(sets[0] + descriptor.lineSize - 1 )->valid,
 			(sets[0] + descriptor.lineSize - 1 )->tag,
 			(sets[0] + descriptor.lineSize - 1 )->lastAccess,
 			(sets[0] + descriptor.lineSize - 1 )->bringAddress
 		); // Assert 789 789 789
-		printf("%ld %d %d\n", sets[1]->tag, sets[1]->lastAccess, sets[1]->bringAddress); // Assert 11 100 100
+		printf("%d - %ld %d %d\n",
+			(sets[0] + descriptor.lineSize )->valid,
+			(sets[0] + descriptor.lineSize )->tag,
+			(sets[0] + descriptor.lineSize )->lastAccess,
+			(sets[0] + descriptor.lineSize )->bringAddress
+		); // Assert 900 900 900
+		printf("%d - %ld %d %d\n",
+			(sets[0] + descriptor.lineSize * descriptor.associativity - 1)->valid,
+			(sets[0] + descriptor.lineSize * descriptor.associativity - 1)->tag,
+			(sets[0] + descriptor.lineSize * descriptor.associativity - 1)->lastAccess,
+			(sets[0] + descriptor.lineSize * descriptor.associativity - 1)->bringAddress
+		); // Last of the set. Assert 500 500 500
+		printf("%d - %ld %d %d\n", sets[1]->valid, sets[1]->tag, sets[1]->lastAccess, sets[1]->bringAddress); // First of the set. Assert 11 100 100
 	*/
 
-
-	readInput(inputFilePath, descriptor);
+	output = readInputFile(inputFilePath, descriptor, sets);
 	printf("\n");
+
+	saveOutputFile(outputFilePath, output);
 
 	return 0;
 }

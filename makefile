@@ -1,6 +1,8 @@
 EXEC=main
 CC=gcc
 CFLAGS=-I.
+LDFLAGS=-lm
+
 ifeq ($(OS),Windows_NT)
   RM = del
   RRM = rmdir
@@ -21,9 +23,10 @@ all: $(EXEC)
 
 main:
 	@echo Compilando o projeto.
-	$(CC) $(CFLAGS) main.c lib.c -o program -lm
+	$(CC) $(CFLAGS) main.c lib.c -o program $(LDFLAGS)
 
 run:
+	$(CC) $(CFLAGS) main.c lib.c -o program $(LDFLAGS)
 	@echo Executando '.\program':
 	@echo ./program $(RUN_ARGS)
 	@./program $(RUN_ARGS)

@@ -7,6 +7,7 @@ struct cacheDescription {
 typedef struct cacheDescription cacheDescription;
 
 struct block {
+	_Bool valid;
   long int tag;
   int lastAccess;
   int bringAddress;
@@ -21,6 +22,16 @@ struct input {
   char operation;
 };
 
+struct output {
+	unsigned long int accessCount;
+	unsigned long int writeHits;
+	unsigned long int writeMisses;
+	unsigned long int readHits;
+	unsigned long int readMisses;
+};
+
 struct input readLine(FILE* pFile, int i, cacheDescription descriptor);
-int readInput(char* path, cacheDescription descriptor);
-cacheDescription readCacheDesc(char* path);
+struct output readInputFile(char* path, cacheDescription descriptor, set sets[descriptor.numberOfLines / descriptor.associativity]);
+cacheDescription readCacheDescription(char* path);
+
+void saveOutputFile(char* path, struct output output);
