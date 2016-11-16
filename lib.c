@@ -15,7 +15,7 @@ int searchInSet(struct input input, cacheDescription descriptor, set set) {
 	size_t hitIndex;
 
 	for (size_t i = 0; i < descriptor.lineSize * descriptor.associativity && isHit != true; i++) {
-		//printf("%d: Valid: %d\tTag: %lld\tLA: %d\tBA: %d\n", i, (set + i)->valid, (set + i)->tag, (set + i)->lastAccess, (set + i)->bringAddress);
+		//printf("%d: Valid: %d\tTag: %lld\tLA: %d\tBA: %d\n", i, (set + i)->valid, (set + i)->tag, (set + i)->lastAccess, (set + i)->orderInsert);
 		if((set + i)->tag == input.tag) { // HIT
 			isHit = true;
 			hitIndex = i;
@@ -29,48 +29,72 @@ int searchInSet(struct input input, cacheDescription descriptor, set set) {
 	}
 }
 
-int readFromSet(struct input input, cacheDescription descriptor, set set, int indexOfHit) {
-	int lastAccessOfHit = (set + indexOfHit)->lastAccess;
-
-	(set + indexOfHit)->valid = true;
-	(set + indexOfHit)->lastAccess = 1;
-
-	for (size_t i = 0; i < descriptor.lineSize * descriptor.associativity; i++) { // Update policy counters
-
+void updatePolicyAll(cacheDescription descriptor, set set) {
+	for (size_t i = 0; i < descriptor.lineSize * descriptor.associativity; i++) { // Updated policy counters
+		if((set + i)->valid) {
+			(set + i)->lastAccess = (set + i)->lastAccess + 1; // LRU
+		}
 	}
 }
 
-int writeToSet(struct input input, cacheDescription descriptor, set set, int wasHit) {
-	int flag = 0;
-
-	if(wasHit) {
-		int indexOfHit = wasHit, lastAccessOfHit = (set + indexOfHit)->lastAccess;
-
-		(set + indexOfHit)->valid = true;
-		(set + indexOfHit)->tag = input.tag;
-		(set + indexOfHit)->lastAccess = 1;
-
-		for (size_t i = 0; i < descriptor.lineSize * descriptor.associativity; i++) { // Updated policy counters
-			if((set + i)->valid && i != indexOfHit) {
-				if((set + i)->lastAccess < lastAccessOfHit) {
-					(set + i)->lastAccess = (set + i)->lastAccess + 1;
-				}
+void updatePolicy(int indexOfHit, int lastAccessOfHit, cacheDescription descriptor, set set) {
+	for (size_t i = 0; i < descriptor.lineSize * descriptor.associativity; i++) { // Updated policy counters
+		if((set + i)->valid && i != indexOfHit) {
+			if((set + i)->lastAccess < lastAccessOfHit) { // LRU
+				(set + i)->lastAccess = (set + i)->lastAccess + 1;
 			}
 		}
-	} else { // was Miss
-		for (size_t i = 0; i < descriptor.lineSize * descriptor.associativity && flag == 0; i++) {
-			if(!(set + i)->valid) {
+	}
+}
+
+int readFromSet(struct input input, cacheDescription descriptor, set set, int indexOfHit) {
+	int lastAccessOfHit = (set + indexOfHit)->lastAccess;
+
+	(set + indexOfHit)->lastAccess = 1;
+	//return data from block
+
+	updatePolicy(indexOfHit, lastAccessOfHit, descriptor, set);
+}
+
+int writeToSet(struct input input, cacheDescription descriptor, set set, int wasHit) {
+	bool isSetNotFull = false;
+
+	if(wasHit) { // elemento já existe no set.
+		int indexOfHit = wasHit, lastAccessOfHit = (set + indexOfHit)->lastAccess;
+
+		(set + indexOfHit)->valid = true;		 //
+		(set + indexOfHit)->tag = input.tag; //
+		(set + indexOfHit)->lastAccess = 1;
+
+		updatePolicy(indexOfHit, lastAccessOfHit, descriptor, set);
+	} else { // was Miss, logo elemento não existe no set.
+		for (size_t i = 0; i < descriptor.lineSize * descriptor.associativity && isSetNotFull == false; i++) {
+			if(!(set + i)->valid) { // set não está cheio.
+				updatePolicyAll(descriptor, set); //atualiza todos os elementos, pois é uma inserção
+
 				(set + i)->valid = true;
 				(set + i)->tag = input.tag;
 				(set + i)->lastAccess = 1;
 
-				flag = 1;
+				isSetNotFull = true;
 				break;
 			}
 		}
 
-		if(flag == 0) {
+		if(!isSetNotFull) {
+			/*
+				Inserção de elemento, mas o set está cheio.
+				Agora a inserção vai depender de qual política foi escolhida.
+			*/
+
 			//check which replacementPolicy and act
+			if(strcmp(descriptor.replacementPolicy, "LRU") == 0) {
+				//
+			} else if (strcmp(descriptor.replacementPolicy, "FIFO") == 0) {
+				//
+			} else {
+				return 1;
+			}
 		}
 	}
 
@@ -83,8 +107,7 @@ int processLine(struct input input, cacheDescription descriptor, set sets[descri
 
 	if(index < 0) {	// MISS
 		if (input.operation == 'R') {
-			// Get from lower level memory.
-			output->readMisses++; // Tag not on cache.
+			output->readMisses++; // Tag not on cache. Get from lower level memory.
 		} else if (input.operation == 'W') {
 			writeToSet(input, descriptor, sets[input.setIndex], false);
 			output->writeMisses++; // Tag not on cache.
@@ -98,17 +121,6 @@ int processLine(struct input input, cacheDescription descriptor, set sets[descri
 			output->writeHits++;
 		}
 	}
-
-	/*if(strcmp(descriptor.replacementPolicy, "LRU") == 0) {
-		if(index < 0) {
-			//miss
-		} else {
-
-		}
-	} else if (strcmp(descriptor.replacementPolicy, "FIFO") == 0) {
-	} else {
-		return 1;
-	}*/
 }
 
 struct input readLine(FILE* pFile, int i, cacheDescription descriptor) {

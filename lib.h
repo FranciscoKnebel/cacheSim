@@ -10,7 +10,7 @@ struct block {
 	_Bool valid;
   long int tag;
   int lastAccess;
-  int bringAddress;
+  int orderInsert;
 };
 typedef struct block block;
 typedef struct block * set;

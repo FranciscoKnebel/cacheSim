@@ -23,13 +23,13 @@ all: $(EXEC)
 
 main:
 	@echo Compilando o projeto.
-	$(CC) $(CFLAGS) main.c lib.c -o program $(LDFLAGS)
+	$(CC) $(CFLAGS) main.c lib.c -o cachesim $(LDFLAGS)
 
 run:
-	$(CC) $(CFLAGS) main.c lib.c -o program $(LDFLAGS)
-	@echo Executando '.\program':
-	@echo ./program $(RUN_ARGS)
-	@./program $(RUN_ARGS)
+	$(CC) $(CFLAGS) main.c lib.c -o cachesim $(LDFLAGS)
+	@echo Executando '.\cachesim':
+	@echo ./cachesim $(RUN_ARGS)
+	@./cachesim $(RUN_ARGS)
 	@echo Execucao encerrada.
 
 clear:
