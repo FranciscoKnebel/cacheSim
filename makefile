@@ -23,13 +23,19 @@ all: $(EXEC)
 
 main:
 	@echo Compilando o projeto.
-	$(CC) $(CFLAGS) main.c lib.c -o cachesim $(LDFLAGS)
+	$(CC) $(CFLAGS) main.c preprocess.c process.c -o cachesim $(LDFLAGS)
 
 run:
-	$(CC) $(CFLAGS) main.c lib.c -o cachesim $(LDFLAGS)
 	@echo Executando '.\cachesim':
 	@echo ./cachesim $(RUN_ARGS)
 	@./cachesim $(RUN_ARGS)
+	@echo Execucao encerrada.
+
+proto:
+	$(CC) $(CFLAGS) main.c preprocess.c process.c -o cachesim $(LDFLAGS)
+	@echo Executando '.\cachesim':
+	@echo ./cachesim test/cachedesc_A.dat test/input_A.dat test/output_A.dat
+	@./cachesim test/cachedesc_A.dat test/input_A.dat test/output_A.dat
 	@echo Execucao encerrada.
 
 clear:

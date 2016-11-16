@@ -1,8 +1,9 @@
 #include <stdio.h>
-#include <lib.h>
 #include <stdbool.h>
 #include <string.h>
 
+#include <types.h>
+#include <preprocess.h>
 /*
 	512 blocks / 8 associativity -> 64 sets
 */
@@ -21,12 +22,12 @@ int main(int argc, char *argv[]) {
 	struct output output;
 
 	printf("\n----------------------------------------------------------\n");
-	printf("--\t\tFrancisco Paiva Knebel\t\t\t--\n");
-	printf("--\t\t       00243688       \t\t\t--\n");
-	printf("--\t                      \t\t\t\t--\n");
-	printf("--\tArquivo de descricao: \t%s\t\t--\n", cacheDescriptionPath);
-	printf("--\tArquivo de input: \t%s\t\t--\n", inputFilePath);
-	printf("--\tArquivo de output: \t%s\t\t--\n", outputFilePath);
+	printf("\t\tFrancisco Paiva Knebel\t\t\t\n");
+	printf("\t\t       00243688       \t\t\t\n");
+	printf("\t                      \t\t\t\t\n");
+	printf("\tArquivo de descricao: \t%s\t\t\n", cacheDescriptionPath);
+	printf("\tArquivo de input: \t%s\t\t\n", inputFilePath);
+	printf("\tArquivo de output: \t%s\t\t\n", outputFilePath);
 	printf("----------------------------------------------------------\n");
 
 	cacheDescription descriptor = readCacheDescription(cacheDescriptionPath);
