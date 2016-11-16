@@ -40,7 +40,7 @@ lastAccess no bloco.
 
 	Inserção de elemento:
 		O set está completamente cheio, e está sendo pedido a inserção de um elemento nessa lista.
-		Será necessário retirar o elemento com o maior lastAccess da lista, que deve ter valor igual à lineSize associativity.
+		Será necessário retirar o elemento com o maior lastAccess da lista, que deve ter valor igual à lineSize * associativity.
 		Alterar os elementos desse bloco para os valores do novo elemento, e alterar o lastAccess para 1.
 		Todos os outros elementos agora deverão ser incrementados em 1, pois não há valores com lastAccess maior do que o antigo.
 
@@ -76,6 +76,13 @@ orderInsert no bloco.
 		Mesmo procedimento do caso Set não está cheio.
 
 -----
+
+## Authors
+
+* **Francisco Knebel** - *Initial work* - [FranciscoKnebel](https://github.com/franciscoknebel)
+
+See also the list of [contributors](https://github.com/franciscoknebel/cacheSim/contributors) who participated in this project.
+
 
 ## License
 

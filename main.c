@@ -32,6 +32,14 @@ int main(int argc, char *argv[]) {
 
 	cacheDescription descriptor = readCacheDescription(cacheDescriptionPath);
 	printf("\n");
+	if(strcmp(descriptor.replacementPolicy, "LRU") != 0 && strcmp(descriptor.replacementPolicy, "FIFO") != 0) {
+		printf("Replacement Policy '%s', lida em '%s', invalida.\n", descriptor.replacementPolicy, cacheDescriptionPath);
+		printf("Valores possiveis: \n");
+		printf("\t%s\n", "LRU");
+		printf("\t%s\n", "FIFO");
+
+		return 2;
+	}
 
 	block blocks[descriptor.numberOfLines][descriptor.lineSize];
 	set 	sets[descriptor.numberOfLines / descriptor.associativity];
@@ -91,16 +99,6 @@ int main(int argc, char *argv[]) {
 		); // Last of the set. Assert 500 500 500
 		printf("%d - %ld %d %d\n", sets[1]->valid, sets[1]->tag, sets[1]->lastAccess, sets[1]->orderInsert); // First of the set. Assert 11 100 100
 	*/
-
-	if(strcmp(descriptor.replacementPolicy, "LRU") != 0 && strcmp(descriptor.replacementPolicy, "FIFO") != 0) {
-		printf("Replacement Policy '%s', lida em '%s', invalida.\n", descriptor.replacementPolicy, cacheDescriptionPath);
-		printf("Valores possiveis: \n");
-		printf("\t%s\n", "LRU");
-		printf("\t%s\n", "FIFO");
-
-		return 2;
-	}
-
 
 	output = readInputFile(inputFilePath, descriptor, sets);
 	printf("\n");
