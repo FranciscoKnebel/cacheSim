@@ -6,31 +6,32 @@
 
 #include <types.h>
 
-double Log2(unsigned int n) {
-  return log(n) / log(2);
-}
-
 int searchInSet(struct input input, cacheDescription descriptor, set set) {
 	bool isHit;
 	size_t hitIndex;
 
-	for (size_t i = 0; i < descriptor.lineSize * descriptor.associativity && isHit != true; i++) {
+	//printf("Procurando por %lld. ", input.tag);
+
+	for (size_t i = 0; i < descriptor.associativity && isHit != true; i++) {
 		//printf("%d: Valid: %d\tTag: %lld\tLA: %d\tBA: %d\n", i, (set + i)->valid, (set + i)->tag, (set + i)->lastAccess, (set + i)->orderInsert);
 		if((set + i)->tag == input.tag) { // HIT
 			isHit = true;
 			hitIndex = i;
 		}
 	}
+  char op;
 
 	if(isHit) { // HIT
+		//printf("Foi hit!\n");
 		return (int) hitIndex;
 	} else { 		// MISS
+		//printf("Foi miss.\n");
 		return -1;
 	}
 }
 
 void updatePolicyAll(cacheDescription descriptor, set set) {
-	for (size_t i = 0; i < descriptor.lineSize * descriptor.associativity; i++) { // Updated policy counters
+	for (size_t i = 0; i < descriptor.associativity; i++) { // Updated policy counters
 		if((set + i)->valid) {
 			(set + i)->lastAccess = (set + i)->lastAccess + 1; // LRU
 			(set + i)->orderInsert = (set + i)->orderInsert + 1; // FIFO
@@ -39,7 +40,7 @@ void updatePolicyAll(cacheDescription descriptor, set set) {
 }
 
 void updatePolicyLRU(int indexOfHit, int lastAccessOfHit, cacheDescription descriptor, set set) {
-	for (size_t i = 0; i < descriptor.lineSize * descriptor.associativity; i++) { // Updated policy counters
+	for (size_t i = 0; i < descriptor.associativity; i++) { // Updated policy counters
 		if((set + i)->valid && i != indexOfHit) {
 			if((set + i)->lastAccess < lastAccessOfHit) { // LRU
 				(set + i)->lastAccess = (set + i)->lastAccess + 1;
@@ -68,18 +69,19 @@ int insertElementLRU(struct input input, cacheDescription descriptor, set set) {
 
 	updatePolicyAll(descriptor, set);
 
-	for (size_t i = 0; i < descriptor.lineSize * descriptor.associativity; i++) {
-		printf("%lld: %lld - %lld ", (set + i)->tag, (set + i)->lastAccess, descriptor.lineSize * descriptor.associativity);
+	for (size_t i = 0; i < descriptor.associativity; i++) {
+		//printf("%lld: %lld\n", (set + i)->tag, (set + i)->lastAccess);
 
-		if((set + i)->lastAccess >= (descriptor.lineSize * descriptor.associativity)) {
-			printf("LRU: Trocando %lld por %lld: ", (set + i)->tag, input.tag);
+		if((set + i)->lastAccess > (descriptor.associativity)) {
+			//printf("LRU: Trocando %lld por %lld: \n", (set + i)->tag, input.tag);
 
 			(set + i)->valid = true;
 			(set + i)->tag = input.tag;
 			(set + i)->lastAccess = 1;
+			break;
 		}
 	}
-	scanf("%c", &op);
+	//scanf("%c", &op);
 
 	return 0;
 }
@@ -95,9 +97,9 @@ int insertElementFIFO(struct input input, cacheDescription descriptor, set set) 
 
 	updatePolicyAll(descriptor, set);
 
-	for (size_t i = 0; i < descriptor.lineSize * descriptor.associativity; i++) {
-		if((set + i)->orderInsert >= (descriptor.lineSize * descriptor.associativity)) {
-			printf("FIFO: Trocando %lld por %lld: ", (set + i)->tag, input.tag);
+	for (size_t i = 0; i < descriptor.associativity; i++) {
+		if((set + i)->orderInsert >= (descriptor.associativity)) {
+			// printf("FIFO: Trocando %lld por %lld: ", (set + i)->tag, input.tag);
 
 			(set + i)->valid = true;
 			(set + i)->tag = input.tag;
@@ -108,20 +110,31 @@ int insertElementFIFO(struct input input, cacheDescription descriptor, set set) 
 	return 0;
 }
 
-int writeToSet(struct input input, cacheDescription descriptor, set set, int wasHit) {
-	if(wasHit) { // elemento já existe no set.
-		int indexOfHit = wasHit, lastAccessOfHit = (set + indexOfHit)->lastAccess;
+int writeToSet(struct input input, cacheDescription descriptor, set set, int hitIndex) {
+	char op;
+	//printf("Was hit: %d\n", hitIndex);
+  //scanf("%c", &op);
+
+	if(hitIndex >= 0) { // elemento já existe no set.
+		int indexOfHit = hitIndex, lastAccessOfHit = (set + indexOfHit)->lastAccess;
 
 		(set + indexOfHit)->valid = true;		 //
 		(set + indexOfHit)->tag = input.tag; //
 		(set + indexOfHit)->lastAccess = 1;
 
 		updatePolicyLRU(indexOfHit, lastAccessOfHit, descriptor, set);
+
+		/* Print set */
+		/*
+		for (size_t i = 0; i < descriptor.associativity; i++) {
+			printf("%d: Valid: %d\tTag: %lld\tLA: %d\tBA: %d\n", i, (set + i)->valid, (set + i)->tag, (set + i)->lastAccess, (set + i)->orderInsert);
+		}
+		*/
 	} else { // was Miss, logo elemento não existe no set.
-		bool isSetFull = true;
+		bool hasNotInserted = true;
 		char op;
 
-		for (size_t i = 0; i < descriptor.lineSize * descriptor.associativity && isSetFull == true; i++) {
+		for (size_t i = 0; i < descriptor.associativity && hasNotInserted == true; i++) {
 			//printf("%d: Valid: %d\tTag: %lld\tLA: %d\tBA: %d\n", i, (set + i)->valid, (set + i)->tag, (set + i)->lastAccess, (set + i)->orderInsert);
 
 			if(!(set + i)->valid) { // Inserção de elemento e o set não está cheio.
@@ -132,21 +145,23 @@ int writeToSet(struct input input, cacheDescription descriptor, set set, int was
 				(set + i)->lastAccess = 1;
 				(set + i)->orderInsert = 1;
 
-				isSetFull = false; // indica que o set não está cheio.
+				hasNotInserted = false; // indica que o set não estava cheio e foi inserido um novo elemento.
 				break;
 			}
 		}
 
-		if(isSetFull) {
+    //scanf("%c", &op);
+
+		if(hasNotInserted) {
 			/*
-				Inserção de elemento, mas o set está cheio.
+				Foi pedido inserção de elemento, mas o set está cheio.
 				Agora a inserção vai depender de qual política foi escolhida.
 			*/
 			if(strcmp(descriptor.replacementPolicy, "LRU") == 0) {
-				//
+				//elemento com maior lastAccess será substituido
 				insertElementLRU(input, descriptor, set);
 			} else if (strcmp(descriptor.replacementPolicy, "FIFO") == 0) {
-				//elemento com maior orderIsert será substituido
+				//elemento com maior orderInsert será substituido
 				insertElementFIFO(input, descriptor, set);
 			} else {
 				return 1;
@@ -157,15 +172,17 @@ int writeToSet(struct input input, cacheDescription descriptor, set set, int was
 	return 0;
 }
 
-int processLine(struct input input, cacheDescription descriptor, set sets[descriptor.numberOfLines / descriptor.associativity], struct output* output) {
+int processLine(struct input input, cacheDescription descriptor, set sets[descriptor.setNumber], struct output* output) {
+  //printf("SetIndex: %d. Tag: %lld. OP: %c\n", input.setIndex, input.tag, input.operation);
 	int index = searchInSet(input, descriptor, sets[input.setIndex]);
 	char op;
 
 	if(index < 0) {	// MISS
 		if (input.operation == 'R') {
 			output->readMisses++; // Tag not on cache. Get from lower level memory.
+      writeToSet(input, descriptor, sets[input.setIndex], index); // substituir bloco da cache por esse bloco, usando LRU ou FIFO.
 		} else if (input.operation == 'W') {
-			writeToSet(input, descriptor, sets[input.setIndex], false);
+			writeToSet(input, descriptor, sets[input.setIndex], index);
 			output->writeMisses++; // Tag not on cache.
 		}
 	} else {			// HIT

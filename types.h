@@ -3,6 +3,7 @@ struct cacheDescription {
   unsigned int numberOfLines;
   unsigned int associativity;
   char replacementPolicy[10];
+  unsigned int setNumber;
 };
 typedef struct cacheDescription cacheDescription;
 

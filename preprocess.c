@@ -14,23 +14,15 @@ struct input readLine(FILE* pFile, int i, cacheDescription descriptor) {
 	char op;
 
 	fscanf(pFile, " %lld %c\n", &address, &op);
-	/*
-	input.tag = (long int) (address >> (long long int) Log2(descriptor.lineSize));
-	input.setIndex = address % (long long int) (descriptor.numberOfLines / descriptor.associativity );
+
+	input.tag = address >> (long long int) log2(descriptor.lineSize);
+	input.setIndex = input.tag % (descriptor.setNumber);
 	input.operation = op;
-	*/
-
-	input.tag = address >> (long long int) Log2(descriptor.lineSize);
-	input.setIndex = input.tag % (descriptor.numberOfLines / descriptor.associativity);
-	input.operation = op;
-
-
-	//printf("%lld - %lld\n", address % (long long int) (descriptor.numberOfLines / descriptor.associativity ), input.setIndex);
 
 	return input;
 }
 
-struct output readInputFile(char* path, cacheDescription descriptor, set sets[descriptor.numberOfLines / descriptor.associativity]) {
+struct output readInputFile(char* path, cacheDescription descriptor, set sets[descriptor.setNumber]) {
 	int accessCount = 0;
 
 	struct input input;
@@ -74,6 +66,7 @@ struct cacheDescription readCacheDescription(char* path) {
 			printf("\treplacement policy = %s\n", cacheDescription.replacementPolicy);
       */
 		}
+		cacheDescription.setNumber = cacheDescription.numberOfLines / cacheDescription.associativity;
 	} else {
 		printf("Nao foi possivel abrir o arquivo '%s'.", path);
 	}

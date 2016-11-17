@@ -1,7 +1,7 @@
 EXEC=main
 CC=gcc
 CFLAGS=-I.
-LDFLAGS=-lm
+LDFLAGS=-lm -std=c99
 
 ifeq ($(OS),Windows_NT)
   RM = del
