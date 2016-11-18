@@ -22,21 +22,31 @@ endif
 all: $(EXEC)
 
 main:
+	@echo --- cacheSim ---
+	@echo Francisco Knebel - 243688
 	@echo Compilando o projeto.
-	$(CC) $(CFLAGS) main.c preprocess.c process.c -o cachesim $(LDFLAGS)
+	@echo ---          ---
+	$(CC) $(CFLAGS) main.c preprocess.c process.c -o 243688 $(LDFLAGS)
 
 run:
-	@echo Executando '.\cachesim':
-	@echo ./cachesim $(RUN_ARGS)
-	@./cachesim $(RUN_ARGS)
+	@echo Executando '.\243688':
+	@echo ./243688 $(RUN_ARGS)
+	@./243688 $(RUN_ARGS)
 	@echo Execucao encerrada.
 
-proto:
-	$(CC) $(CFLAGS) main.c preprocess.c process.c -o cachesim $(LDFLAGS)
-	@echo Executando '.\cachesim':
-	@echo ./cachesim test/cachedesc_A.dat test/input_A.dat test/output_A.dat
-	@./cachesim test/cachedesc_A.dat test/input_A.dat test/output_A.dat
+tests:
+	$(CC) $(CFLAGS) main.c preprocess.c process.c -o 243688 $(LDFLAGS)
+	@echo Executando '.\243688':
+	@echo ./243688 test/cachedesc_A.dat test/input_A.dat test/output_A.dat
+	@./243688 test/cachedesc_A.dat test/input_A.dat test/output_A.dat
+	@echo ./243688 test/cachedesc_B.dat test/input_B.dat test/output_B.dat
+	@./243688 test/cachedesc_B.dat test/input_B.dat test/output_B.dat
+	@echo ./243688 test/cachedesc_C.dat test/input_C.dat test/output_C.dat
+	@./243688 test/cachedesc_C.dat test/input_C.dat test/output_C.dat
+	@echo ./243688 test/cachedesc_D.dat test/input_D.dat test/output_D.dat
+	@./243688 test/cachedesc_D.dat test/input_D.dat test/output_D.dat
 	@echo Execucao encerrada.
+	
 
 clear:
 	cls

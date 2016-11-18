@@ -4,28 +4,22 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include <types.h>
+#include "structuretypes.h"
 
 int searchInSet(struct input input, cacheDescription descriptor, set set) {
 	bool isHit;
 	size_t hitIndex;
 
-	//printf("Procurando por %lld. ", input.tag);
-
 	for (size_t i = 0; i < descriptor.associativity && isHit != true; i++) {
-		//printf("%d: Valid: %d\tTag: %lld\tLA: %d\tBA: %d\n", i, (set + i)->valid, (set + i)->tag, (set + i)->lastAccess, (set + i)->orderInsert);
 		if((set + i)->tag == input.tag) { // HIT
 			isHit = true;
 			hitIndex = i;
 		}
 	}
-  char op;
 
 	if(isHit) { // HIT
-		//printf("Foi hit!\n");
 		return (int) hitIndex;
 	} else { 		// MISS
-		//printf("Foi miss.\n");
 		return -1;
 	}
 }
@@ -56,6 +50,8 @@ int readFromSet(struct input input, cacheDescription descriptor, set set, int in
 	//return data from block
 
 	updatePolicyLRU(indexOfHit, lastAccessOfHit, descriptor, set);
+
+	return 0;
 }
 
 int insertElementLRU(struct input input, cacheDescription descriptor, set set) {
@@ -65,23 +61,17 @@ int insertElementLRU(struct input input, cacheDescription descriptor, set set) {
 		Alterar os elementos desse bloco para os valores do novo elemento, e alterar o lastAccess para 1.
 		Todos os outros elementos agora deverão ser incrementados em 1, pois não há valores com lastAccess maior do que o antigo.
 	*/
-	char op;
 
 	updatePolicyAll(descriptor, set);
 
 	for (size_t i = 0; i < descriptor.associativity; i++) {
-		//printf("%lld: %lld\n", (set + i)->tag, (set + i)->lastAccess);
-
 		if((set + i)->lastAccess > (descriptor.associativity)) {
-			//printf("LRU: Trocando %lld por %lld: \n", (set + i)->tag, input.tag);
-
 			(set + i)->valid = true;
 			(set + i)->tag = input.tag;
 			(set + i)->lastAccess = 1;
 			break;
 		}
 	}
-	//scanf("%c", &op);
 
 	return 0;
 }
@@ -98,9 +88,7 @@ int insertElementFIFO(struct input input, cacheDescription descriptor, set set) 
 	updatePolicyAll(descriptor, set);
 
 	for (size_t i = 0; i < descriptor.associativity; i++) {
-		if((set + i)->orderInsert >= (descriptor.associativity)) {
-			// printf("FIFO: Trocando %lld por %lld: ", (set + i)->tag, input.tag);
-
+		if((set + i)->orderInsert > (descriptor.associativity)) {
 			(set + i)->valid = true;
 			(set + i)->tag = input.tag;
 			(set + i)->orderInsert = 1;
@@ -111,10 +99,6 @@ int insertElementFIFO(struct input input, cacheDescription descriptor, set set) 
 }
 
 int writeToSet(struct input input, cacheDescription descriptor, set set, int hitIndex) {
-	char op;
-	//printf("Was hit: %d\n", hitIndex);
-  //scanf("%c", &op);
-
 	if(hitIndex >= 0) { // elemento já existe no set.
 		int indexOfHit = hitIndex, lastAccessOfHit = (set + indexOfHit)->lastAccess;
 
@@ -123,20 +107,10 @@ int writeToSet(struct input input, cacheDescription descriptor, set set, int hit
 		(set + indexOfHit)->lastAccess = 1;
 
 		updatePolicyLRU(indexOfHit, lastAccessOfHit, descriptor, set);
-
-		/* Print set */
-		/*
-		for (size_t i = 0; i < descriptor.associativity; i++) {
-			printf("%d: Valid: %d\tTag: %lld\tLA: %d\tBA: %d\n", i, (set + i)->valid, (set + i)->tag, (set + i)->lastAccess, (set + i)->orderInsert);
-		}
-		*/
 	} else { // was Miss, logo elemento não existe no set.
 		bool hasNotInserted = true;
-		char op;
 
 		for (size_t i = 0; i < descriptor.associativity && hasNotInserted == true; i++) {
-			//printf("%d: Valid: %d\tTag: %lld\tLA: %d\tBA: %d\n", i, (set + i)->valid, (set + i)->tag, (set + i)->lastAccess, (set + i)->orderInsert);
-
 			if(!(set + i)->valid) { // Inserção de elemento e o set não está cheio.
 				updatePolicyAll(descriptor, set); // atualiza todos os elementos, pois é uma inserção
 
@@ -149,8 +123,6 @@ int writeToSet(struct input input, cacheDescription descriptor, set set, int hit
 				break;
 			}
 		}
-
-    //scanf("%c", &op);
 
 		if(hasNotInserted) {
 			/*
@@ -173,9 +145,7 @@ int writeToSet(struct input input, cacheDescription descriptor, set set, int hit
 }
 
 int processLine(struct input input, cacheDescription descriptor, set sets[descriptor.setNumber], struct output* output) {
-  //printf("SetIndex: %d. Tag: %lld. OP: %c\n", input.setIndex, input.tag, input.operation);
 	int index = searchInSet(input, descriptor, sets[input.setIndex]);
-	char op;
 
 	if(index < 0) {	// MISS
 		if (input.operation == 'R') {

@@ -4,8 +4,21 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include <types.h>
-#include <process.h>
+#include "structuretypes.h"
+#include "process.h"
+
+void clearCache(cacheDescription descriptor, set sets[descriptor.setNumber]) {
+	for (size_t i = 0; i < descriptor.setNumber; i++) {
+		for (size_t j = 0; j < descriptor.associativity; j++) {
+			(sets[i] + j)->valid = 0;
+			(sets[i] + j)->tag = 0;
+			(sets[i] + j)->lastAccess = 0;
+			(sets[i] + j)->orderInsert = 0;
+		}
+	}
+
+	return;
+};
 
 struct input readLine(FILE* pFile, int i, cacheDescription descriptor) {
 	struct input input;
@@ -40,11 +53,11 @@ struct output readInputFile(char* path, cacheDescription descriptor, set sets[de
 				output.accessCount = accessCount;
 			}
 		}
+		printf("Arquivo de input finalizado.\n");
 	} else {
 		printf("Nao foi possivel abrir o arquivo '%s'.", path);
 	}
 
-	printf("Arquivo de input finalizado.\n");
 	fclose(pFile);
 
 	return output;
@@ -57,21 +70,17 @@ struct cacheDescription readCacheDescription(char* path) {
 	FILE * pFile = fopen(path, "r");
 	if (pFile != NULL) {
 		while(!feof(pFile)) {
-			fscanf(pFile, "line size = %d\nnumber of lines = %d\nassociativity = %d\nreplacement policy = %s\n",
-			&cacheDescription.lineSize, &cacheDescription.numberOfLines, &cacheDescription.associativity, cacheDescription.replacementPolicy);
-			/*
-      printf("\tline size = %d\n", cacheDescription.lineSize);
-			printf("\tnumber of lines = %d\n", cacheDescription.numberOfLines);
-			printf("\tassociativity = %d\n", cacheDescription.associativity);
-			printf("\treplacement policy = %s\n", cacheDescription.replacementPolicy);
-      */
+			fscanf(pFile, "line size = %d\n", &cacheDescription.lineSize);
+			fscanf(pFile, "number of lines = %d\n", &cacheDescription.numberOfLines);
+			fscanf(pFile, "associativity = %d\n", &cacheDescription.associativity);
+			fscanf(pFile, "replacement policy = %s\n", cacheDescription.replacementPolicy);
 		}
 		cacheDescription.setNumber = cacheDescription.numberOfLines / cacheDescription.associativity;
+		printf("Descricao de cache lida.\n");
 	} else {
 		printf("Nao foi possivel abrir o arquivo '%s'.", path);
 	}
 
-	printf("Descricao de cache lida.\n");
 	fclose(pFile);
 
 	return cacheDescription;
@@ -94,6 +103,12 @@ void saveOutputFile(char* path, struct output output) {
 		fprintf(pFile, "Read misses:%lld\n", output.readMisses);
 		fprintf(pFile, "Write hits:%lld\n", output.writeHits);
 		fprintf(pFile, "Write misses:%lld\n", output.writeMisses);
+
+		printf("Access count\t: %lld\n", output.accessCount);
+		printf("Read hits\t: %lld\n", output.readHits);
+		printf("Read misses\t: %lld\n", output.readMisses);
+		printf("Write hits\t: %lld\n", output.writeHits);
+		printf("Write misses\t: %lld\n", output.writeMisses);
 	} else {
 		printf("Nao foi possivel abrir o arquivo '%s'.", path);
 	}

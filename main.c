@@ -2,24 +2,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include <types.h>
-#include <preprocess.h>
-/*
-	512 blocks / 8 associativity -> 64 sets
-*/
-
-void clearCache(cacheDescription descriptor, set sets[descriptor.setNumber]) {
-	for (size_t i = 0; i < descriptor.setNumber; i++) {
-		for (size_t j = 0; j < descriptor.associativity; j++) {
-			(sets[i] + j)->valid = 0;
-			(sets[i] + j)->tag = 0;
-			(sets[i] + j)->lastAccess = 0;
-			(sets[i] + j)->orderInsert = 0;
-		}
-	}
-
-	return;
-};
+#include "structuretypes.h"
+#include "preprocess.h"
 
 int main(int argc, char *argv[]) {
 	if(argc < 4) {
@@ -45,6 +29,11 @@ int main(int argc, char *argv[]) {
 
 	cacheDescription descriptor = readCacheDescription(cacheDescriptionPath);
 	printf("\n");
+
+	if(descriptor.lineSize <= 0) {
+		return 3;
+	}
+
 	if(strcmp(descriptor.replacementPolicy, "LRU") != 0 && strcmp(descriptor.replacementPolicy, "FIFO") != 0) {
 		printf("Replacement Policy '%s', lida em '%s', invalida.\n", descriptor.replacementPolicy, cacheDescriptionPath);
 		printf("Valores possiveis: \n");
@@ -114,7 +103,7 @@ int main(int argc, char *argv[]) {
 	printf("\n");
 
 	saveOutputFile(outputFilePath, output);
-
+	printf("\n----------------------------------------------------------\n");
 
 	return 0;
 }

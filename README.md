@@ -1,14 +1,17 @@
 # CacheSim
+Simulador de cache
 
 ### Compiler: GCC 6.2
 ```
-	Makefile:
-
+Makefile:
 	make
-		build files and run
+		build files
 
 	make run ARGS
 		run built program
+
+	make tests
+		runs the test inputs from the test folder
 
 	make clean
 		clean *.exe
@@ -16,6 +19,9 @@
 
 ARGS:
 - cache_description.dat input.dat output.dat
+
+## Estrutura da cache
+
 
 ## Replacement Policies
 
